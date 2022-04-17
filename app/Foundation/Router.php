@@ -4,67 +4,75 @@ namespace App\Foundation;
 
 class Router
 {
+    /**
+     * Routes for the appliction
+     *
+     * @var array
+     */
     protected array $routes = [];
 
-    public function __construct(private Request $request, private Response $response)
+    /**
+     * Construct the router
+     *
+     * @param Application $app
+     * @property Application $app
+     */
+    public function __construct(private Application $app)
     {
         //
     }
 
-    public function get($path, $callback)
+    /**
+     * Set get routes
+     *
+     * @param string $path
+     * @param mixed $callback
+     * @return void
+     */
+    public function get(string $path, mixed $callback): void
     {
         $this->routes['get'][$path] = $callback;
     }
 
-    public function post($path, $callback)
+    /**
+     * Set post routes
+     *
+     * @param string $path
+     * @param mixed $callback
+     * @return void
+     */
+    public function post(string $path, mixed $callback): void
     {
         $this->routes['post'][$path] = $callback;
     }
 
-    public function resolve()
+    /**
+     * Resolve the application
+     *
+     * @return mixed
+     */
+    public function resolve(): mixed
     {
-        $method = $this->request->getMethod();
+        $method = $this->app->request->method();
 
-        $path = $this->request->getPath();
+        $path = $this->app->request->path();
 
         $callback = $this->routes[$method][$path] ?? false;
 
         if ($callback === false) {
-            $this->response->setStatusCode(404);
-            return 'Not Found';
+            $this->app->response->statusCode(404);
+
+            return $this->app->view->render('errors/404');
         }
 
         if (is_string($callback)) {
-            return $this->renderView($callback);
+            return $this->app->view->render($callback);
+        }
+
+        if (is_array($callback)) {
+            $callback[0] = new $callback[0]();
         }
 
         return call_user_func($callback);
-    }
-
-    private function renderView($view)
-    {
-        $layoutContent = $this->layoutContent();
-
-        $viewContent = $this->viewContent($view);
-
-        return str_replace('{{ content }}', $viewContent, $layoutContent);
-    }
-
-    private function layoutContent()
-    {
-        ob_start();
-
-        include_once Application::$ROOT_DIR . "/resources/views/layouts/app.php";
-
-        return ob_get_clean();
-    }
-
-    private function viewContent($view)
-    {
-        ob_start();
-
-        include_once Application::$ROOT_DIR . "/resources/views/{$view}.php";
-
-        return ob_get_clean();
     }
 }

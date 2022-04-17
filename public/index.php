@@ -14,7 +14,7 @@ use App\Foundation\Application;
 */
 
 require __DIR__ . '/../vendor/autoload.php';
-
+//php_info();
 /*
 |--------------------------------------------------------------------------
 | Create The Application
@@ -25,11 +25,5 @@ require __DIR__ . '/../vendor/autoload.php';
 */
 
 $app = new Application(dirname(__DIR__));
-
-$app->router->get('/', function () {
-    echo 'Home Page';
-});
-
-$app->router->get('/home', 'home');
 
 $app->run();

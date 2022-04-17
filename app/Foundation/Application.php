@@ -4,31 +4,89 @@ namespace App\Foundation;
 
 class Application
 {
-    //public static Application $app;
+    /**
+     * Application instance
+     *
+     * @var Application
+     */
+    public static Application $app;
 
-    public static string $ROOT_DIR;
-
+    /**
+     * Request instance
+     *
+     * @var Request
+     */
     public Request $request;
 
-    public Router $router;
-
+    /**
+     * Response instance
+     *
+     * @var Response
+     */
     public Response $response;
 
-    public function __construct($rootDir)
-    {
-        //self::$app = $this;
+    /**
+     * View instance
+     *
+     * @var View
+     */
+    public View $view;
 
-        self::$ROOT_DIR = $rootDir;
+    /**
+     * Router instance
+     *
+     * @var Router
+     */
+    public Router $router;
+
+    /**
+     * Validator instance
+     *
+     * @var Validator
+     */
+    public Validator $validator;
+
+    /**
+     * Session instance
+     *
+     * @var Session
+     */
+    public Session $session;
+
+    /**
+     * Construct the application
+     *
+     * @param string $rootDir
+     * @property string $rootDir
+     */
+    public function __construct(public string $rootDir)
+    {
+        self::$app = $this;
+
+        $this->session = new Session();
 
         $this->request = new Request();
 
         $this->response = new Response();
 
-        $this->router = new Router($this->request, $this->response);
+        $this->view = new View($this);
+
+        $this->router = new Router($this);
+
+        $this->validator = new Validator($this);
     }
 
-    public function run()
+    /**
+     * Run the application
+     *
+     * @return void
+     */
+    public function run(): void
     {
+        require_once $this->rootDir . '/routes/web.php';
+
         echo $this->router->resolve();
+
+        $this->session->handle();
     }
 }

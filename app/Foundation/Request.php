@@ -4,7 +4,12 @@ namespace App\Foundation;
 
 class Request
 {
-    public function getPath()
+    /**
+     * Get the request path
+     *
+     * @return string
+     */
+    public function path(): string
     {
         $path = $_SERVER['REQUEST_URI'] ?? '/';
 
@@ -17,8 +22,37 @@ class Request
         return substr($path, 0, $position);
     }
 
-    public function getMethod()
+    /**
+     * Get the request method
+     *
+     * @return string
+     */
+    public function method(): string
     {
         return strtolower($_SERVER['REQUEST_METHOD']);
+    }
+
+    /**
+     * Get the request body
+     *
+     * @return array
+     */
+    public function body(): array
+    {
+        $body = [];
+
+        if ($this->method() === 'get') {
+            foreach ($_GET as $key => $value) {
+                $body[$key] = filter_input(INPUT_GET, $value, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            }
+        }
+
+        if ($this->method() === 'post') {
+            foreach ($_POST as $key => $value) {
+                $body[$key] = filter_input(INPUT_POST, $value, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            }
+        }
+
+        return $body;
     }
 }
